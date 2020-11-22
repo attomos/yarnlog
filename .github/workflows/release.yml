@@ -6,171 +6,96 @@ on:
       - '*.*.*'
 
 jobs:
-
-  Linux:
+  release:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Get tag
-      id: tag
-      run: |
-        echo ::set-output name=tag::${GITHUB_REF#refs/tags/}
-    - name: Building release
-      run: |
-        make linux_release
-    - name: Upload release file
-      uses: actions/upload-artifact@v1
-      with:
-        name: yarnlog-${{ steps.tag.outputs.tag }}-linux.tar.gz
-        path: releases/yarnlog-${{ steps.tag.outputs.tag }}-linux.tar.gz
-    - name: Upload checksum file
-      uses: actions/upload-artifact@v1
-      with:
-        name: yarnlog-${{ steps.tag.outputs.tag }}-linux.sha256sum
-        path: releases/yarnlog-${{ steps.tag.outputs.tag }}-linux.sha256sum
+      - uses: actions/checkout@v2
 
-  MacOS:
-    runs-on: macos-latest
-
-    steps:
-    - uses: actions/checkout@v2
-    - name: Get tag
-      id: tag
-      run: |
-        echo ::set-output name=tag::${GITHUB_REF#refs/tags/}
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v2
-      with:
-        python-version: "3.8"
-    - name: Install Poetry
-      run: |
-        python get-poetry.py --preview -y
-        source $HOME/.poetry/env
-    - name: Install dependencies
-      run: |
-        source $HOME/.poetry/env
-        poetry install --no-dev
-    - name: Preparing Python executables
-      run: |
-        curl -L https://github.com/sdispater/python-binaries/releases/download/3.6.8/python-3.6.8.macos.tar.xz -o python-3.6.8.tar.xz
-        curl -L https://github.com/sdispater/python-binaries/releases/download/3.7.6/python-3.7.6.macos.tar.xz -o python-3.7.6.tar.xz
-        curl -L https://github.com/sdispater/python-binaries/releases/download/3.8.2/python-3.8.2.macos.tar.xz -o python-3.8.2.tar.xz
-        curl -L https://github.com/sdispater/python-binaries/releases/download/3.9.0b4/python-3.9.0b4.macos.tar.xz -o python-3.9.0b4.tar.xz
-        tar -zxf python-3.6.8.tar.xz
-        tar -zxf python-3.7.6.tar.xz
-        tar -zxf python-3.8.2.tar.xz
-        tar -zxf python-3.9.0b4.tar.xz
-    - name: Build specific release
-      run: |
-        source $HOME/.poetry/env
-        poetry run python sonnet make release --ansi -P "3.6:python-3.6.8/bin/python" -P "3.7:python-3.7.6/bin/python" -P "3.8:python-3.8.2/bin/python" -P "3.9:python-3.9.0b4/bin/python"
-    - name: Upload release file
-      uses: actions/upload-artifact@v1
-      with:
-        name: yarnlog-${{ steps.tag.outputs.tag }}-darwin.tar.gz
-        path: releases/yarnlog-${{ steps.tag.outputs.tag }}-darwin.tar.gz
-    - name: Upload checksum file
-      uses: actions/upload-artifact@v1
-      with:
-        name: yarnlog-${{ steps.tag.outputs.tag }}-darwin.sha256sum
-        path: releases/yarnlog-${{ steps.tag.outputs.tag }}-darwin.sha256sum
-
-  Release:
-    needs: [Linux, MacOS]
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Get tag
-        id: tag
-        run: |
-          echo ::set-output name=tag::${GITHUB_REF#refs/tags/}
-      - name: Download Linux release file
-        uses: actions/download-artifact@master
-        with:
-          name: yarnlog-${{ steps.tag.outputs.tag }}-linux.tar.gz
-          path: releases/
-      - name: Download Linux checksum file
-        uses: actions/download-artifact@master
-        with:
-          name: yarnlog-${{ steps.tag.outputs.tag }}-linux.sha256sum
-          path: releases/
-      - name: Download MacOS release file
-        uses: actions/download-artifact@master
-        with:
-          name: yarnlog-${{ steps.tag.outputs.tag }}-darwin.tar.gz
-          path: releases/
-      - name: Download MacOS checksum file
-        uses: actions/download-artifact@master
-        with:
-          name: yarnlog-${{ steps.tag.outputs.tag }}-darwin.sha256sum
-          path: releases/
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.tag.outputs.tag }}
-          release_name: ${{ steps.tag.outputs.tag }}
-          draft: false
-          prerelease: false
-      - name: Upload Linux release file asset
-        uses: actions/upload-release-asset@v1.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: releases/yarnlog-${{ steps.tag.outputs.tag }}-linux.tar.gz
-          asset_name: yarnlog-${{ steps.tag.outputs.tag }}-linux.tar.gz
-          asset_content_type: application/gzip
-      - name: Upload Linux checksum file asset
-        uses: actions/upload-release-asset@v1.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: releases/yarnlog-${{ steps.tag.outputs.tag }}-linux.sha256sum
-          asset_name: yarnlog-${{ steps.tag.outputs.tag }}-linux.sha256sum
-          asset_content_type: text/plain
-      - name: Upload MacOS release file asset
-        uses: actions/upload-release-asset@v1.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: releases/yarnlog-${{ steps.tag.outputs.tag }}-darwin.tar.gz
-          asset_name: yarnlog-${{ steps.tag.outputs.tag }}-darwin.tar.gz
-          asset_content_type: application/gzip
-      - name: Upload MacOS checksum file asset
-        uses: actions/upload-release-asset@v1.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: releases/yarnlog-${{ steps.tag.outputs.tag }}-darwin.sha256sum
-          asset_name: yarnlog-${{ steps.tag.outputs.tag }}-darwin.sha256sum
-          asset_content_type: text/plain
-      - name: Set up Python 3.8
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
-          python-version: "3.8"
-      - name: Install Poetry
+          python-version: ${{ matrix.python-version }}
+
+      - name: Get full Python version
+        id: full-python-version
+        shell: bash
+        run: echo ::set-output name=version::$(python -c "import sys; print('-'.join(str(v) for v in sys.version_info))")
+
+      - name: Run Poetry
+        uses: abatilo/actions-poetry@v2.0.0
+        with:
+          poetry-version: ${{ matrix.poetry-version }}
+
+      - name: Bootstrap poetry
+        shell: bash
         run: |
-          python get-poetry.py --preview -y
+          python -m ensurepip
+          python -m pip install --upgrade pip
+          python -m pip install .
+
+      - name: Configure poetry
+        shell: bash
+        run: poetry config virtualenvs.in-project true
+
+      - name: Set up cache
+        uses: actions/cache@v2
+        id: cache
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ steps.full-python-version.outputs.version }}-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Ensure cache is healthy
+        if: steps.cache.outputs.cache-hit == 'true'
+        shell: bash
+        run: timeout 10s poetry run pip --version || rm -rf .venv
+
       - name: Install dependencies
-        run: |
-          source $HOME/.poetry/env
-          poetry install --no-dev
+        shell: bash
+        run: poetry install
+
       - name: Build project for distribution
-        run: |
-          source $HOME/.poetry/env
-          poetry run poetry build
-      # - name: Publish to PyPI
-      #   env:
-      #     POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
+        shell: bash
+        run: poetry run poetry build
+
+      # - name: Get tag
+      #   id: tag
       #   run: |
-      #     source $HOME/.poetry/env
-      #     poetry run poetry publish
+      #     echo ::set-output name=tag::${GITHUB_REF#refs/tags/}
+
+      # - name: Create Release
+      #   id: create_release
+      #   uses: actions/create-release@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     tag_name: ${{ steps.tag.outputs.tag }}
+      #     release_name: ${{ steps.tag.outputs.tag }}
+      #     draft: false
+      #     prerelease: false
+
+      # - name: Upload release file asset
+      #   uses: actions/upload-release-asset@v1.0.1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: releases/yarnlog-${{ steps.tag.outputs.tag }}.tar.gz
+      #     asset_name: yarnlog-${{ steps.tag.outputs.tag }}.tar.gz
+      #     asset_content_type: application/gzip
+      #
+      # - name: Upload checksum file asset
+      #   uses: actions/upload-release-asset@v1.0.1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: releases/yarnlog-${{ steps.tag.outputs.tag }}.sha256sum
+      #     asset_name: yarnlog-${{ steps.tag.outputs.tag }}.sha256sum
+      #     asset_content_type: text/plain
+
+      - name: Publish to PyPI
+        env:
+          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
+        run: |
+          poetry publish
