@@ -28,15 +28,21 @@ jobs:
         shell: bash
         run: echo ::set-output name=version::$(python -c "import sys; print('-'.join(str(v) for v in sys.version_info))")
 
+      - name: Install Poetry
+        run: |
+          python get-poetry.py --preview -y
+          source $HOME/.poetry/env
+
       - name: Bootstrap poetry
         shell: bash
         run: |
           python -m ensurepip
           python -m pip install --upgrade pip
           python -m pip install .
+
       - name: Configure poetry
         shell: bash
-        run: python -m poetry config virtualenvs.in-project true
+        run: poetry config virtualenvs.in-project true
 
       - name: Set up cache
         uses: actions/cache@v2
@@ -48,12 +54,12 @@ jobs:
       - name: Ensure cache is healthy
         if: steps.cache.outputs.cache-hit == 'true'
         shell: bash
-        run: timeout 10s python -m poetry run pip --version || rm -rf .venv
+        run: timeout 10s poetry run pip --version || rm -rf .venv
 
       - name: Install dependencies
         shell: bash
-        run: python -m poetry install
+        run: poetry install
 
       - name: Run pytest
         shell: bash
-        run: python -m poetry run python -m pytest -v tests
+        run: poetry run python -m pytest -v tests
