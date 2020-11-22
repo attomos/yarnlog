@@ -6,17 +6,23 @@
 
 Download Apache Hadoop YARN log to your local machine.
 
+## Installation
+
+```bash
+$ pip install yarnlog
+```
+
 ## Usage
 
 ```bash
 $ yarnlog <YARN_URL>
 ```
 
-## Dev
+## Development
 
 ### Set up development environment
 
-I use Poetry to manage dependencies
+I use Poetry to manage build process and dependencies.
 
 ```bash
 $ poetry install
