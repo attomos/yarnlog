@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "yarnlog"
-version = "0.1.0"
+version = "0.1.1"
 description = "Download Apache Hadoop YARN log to your local machine."
 authors = ["Nattaphoom Chaipreecha <attomos@gmail.com>"]
 
