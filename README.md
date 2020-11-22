@@ -34,5 +34,5 @@ $ pytest
 $ pytest --cov=yarnlog tests
 
 # coverage with html report
-pytest --cov=yarnlog --cov-report html:htmlcov tests
+$ pytest --cov=yarnlog --cov-report html:htmlcov tests
 ```
