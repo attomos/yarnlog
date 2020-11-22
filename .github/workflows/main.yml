@@ -75,6 +75,18 @@ jobs:
         python-version: [3.8]
     steps:
       # Feels super redudandant, will find a better approach later
+      - uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Get full Python version
+        id: full-python-version
+        shell: bash
+        run: echo ::set-output name=version::$(python -c "import sys; print('-'.join(str(v) for v in sys.version_info))")
+
       - name: Run Poetry
         uses: abatilo/actions-poetry@v2.0.0
         with:
