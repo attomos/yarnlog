@@ -7,7 +7,7 @@ license = "MIT"
 
 readme = "README.md"
 
-repository = "https://github.com/attomos/ylog"
+repository = "https://github.com/attomos/yarnlog"
 
 keywords = ["yarn", "hadoop", "resource manager", "log"]
 
