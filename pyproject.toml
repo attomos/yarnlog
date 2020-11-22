@@ -3,6 +3,13 @@ name = "yarnlog"
 version = "0.1.1"
 description = "Download Apache Hadoop YARN log to your local machine."
 authors = ["Nattaphoom Chaipreecha <attomos@gmail.com>"]
+license = "MIT"
+
+readme = "README.md"
+
+repository = "https://github.com/attomos/ylog"
+
+keywords = ["yarn", "hadoop", "resource manager", "log"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
