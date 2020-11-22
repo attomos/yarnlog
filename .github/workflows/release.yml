@@ -56,7 +56,7 @@ jobs:
 
       - name: Install dependencies
         shell: bash
-        run: poetry install
+        run: poetry install --no-dev
 
       - name: Build project for distribution
         shell: bash
